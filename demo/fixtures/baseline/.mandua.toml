@@ -1,0 +1,10 @@
+[repository]
+canonical_branch = "main"
+notes_ref = "refs/notes/review"
+knowledge_roots = ["knowledge"]
+max_file_bytes = 1048576
+
+[[invariants]]
+kind = "unique-json-field"
+path = "knowledge/irrigation-rules.json"
+field = "id"

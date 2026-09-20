@@ -1,0 +1,7 @@
+[
+  {
+    "id": "IRR-001",
+    "rule": "Water each bed when soil moisture is below 45%.",
+    "threshold_percent": 45
+  }
+]

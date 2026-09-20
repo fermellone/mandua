@@ -1,0 +1,75 @@
+[build-system]
+requires = ["hatchling>=1.27,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mandua-memory"
+version = "0.1.0"
+description = "Verifiable agent memory, backed by Git."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+keywords = ["agents", "git", "memory", "provenance", "temporal-memory"]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+  "Topic :: Software Development :: Version Control :: Git",
+]
+dependencies = []
+
+[project.scripts]
+mandua = "mandua.cli:main"
+
+[project.urls]
+Repository = "https://github.com/fermellone/mandua"
+Issues = "https://github.com/fermellone/mandua/issues"
+Documentation = "https://github.com/fermellone/mandua#readme"
+
+[dependency-groups]
+dev = [
+  "pytest>=8.3,<10",
+  "ruff>=0.9,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mandua"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"demo" = "mandua/_demo"
+"adapters" = "adapters"
+
+[tool.hatch.build.targets.sdist]
+include = [
+  "/.githooks",
+  "/ACKNOWLEDGMENTS.md",
+  "/adapters",
+  "/CONTRIBUTING.md",
+  "/LICENSE",
+  "/Makefile",
+  "/README.md",
+  "/SECURITY.md",
+  "/demo",
+  "/docs/conformance.md",
+  "/docs/hardening-status.md",
+  "/docs/prior-art.md",
+  "/docs/release-candidate.md",
+  "/docs/tutorial.md",
+  "/pyproject.toml",
+  "/scripts",
+  "/src",
+  "/tests",
+  "/uv.lock",
+]
+
+[tool.pytest.ini_options]
+addopts = "-ra"
+testpaths = ["tests"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+extend-exclude = ["docs/superpowers/plans", "docs/superpowers/specs"]

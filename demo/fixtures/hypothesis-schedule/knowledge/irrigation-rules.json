@@ -1,0 +1,7 @@
+[
+  {
+    "id": "IRR-001",
+    "rule": "Water each bed at 06:00 UTC.",
+    "schedule": "06:00 UTC"
+  }
+]

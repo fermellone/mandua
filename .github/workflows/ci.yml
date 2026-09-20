@@ -1,0 +1,36 @@
+name: CI
+
+"on":
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify (${{ matrix.os }}, Python ${{ matrix.python-version }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.11"]
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Install uv and Python
+        uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.11"
+      - name: Sync the locked environment
+        run: uv sync --locked
+      - name: Run format, lint, unit, and real-Git acceptance checks
+        run: make check
+      - name: Run the credential-free local demo
+        run: make demo
+      - name: Verify the generated executable tutorial
+        run: make tutorial-check
