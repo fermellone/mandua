@@ -2,6 +2,11 @@
 
 Verifiable agent memory, backed by Git.
 
+**[Try the demo with your agent](docs/try-demo.md)** - Register the skill, prepare
+the fictional garden memory, and start a conversation. For a less biased trial,
+use a clean client environment; the guide explains options, including a separate
+profile, a Docker container, or a virtual machine.
+
 Mandu'a means to remember in Guarani. It is a deterministic reference implementation of a
 strict, Git-evidence-backed memory model for agents working in existing repositories. Current
 knowledge remains in ordinary files; transitions, recorded decisions, alternatives, reviews,

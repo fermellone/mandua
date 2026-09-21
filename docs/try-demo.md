@@ -8,6 +8,41 @@ Use a local client that can read files and run tools. The conversational workflo
 has been tried in pi. Registration in Claude Code and Codex has not yet been
 verified end to end. A browser-only chat without local tools cannot run this demo.
 
+## Before starting: choose a clean environment
+
+We recommend trying this PoC in a clean client environment, especially if your
+usual assistant already has a memory system. Previous conversations, saved
+memories, global instructions, other skills and connected retrieval tools can
+influence its answers. For this trial, the garden records should be the only
+source of information about the case.
+
+A new conversation and an empty folder are useful, but they do not necessarily
+disable client-wide memory or configuration. Choose an option that fits your
+client and experience:
+
+| Option | What to do | What to check |
+| --- | --- | --- |
+| Separate client profile | If your client supports isolated profiles or configuration directories, create a fresh one just for this trial. Register only the Mandu'a skill there. | Confirm it does not inherit your usual memory, instructions, plugins or connections. |
+| Separate operating-system user | Use a dedicated local user account and set up your coding client there. | Avoid importing your usual client settings; check whether signing in restores account-level memory. |
+| Docker container | Run a compatible command-line client and Mandu'a together in a disposable Linux container with fresh client configuration and a dedicated demo directory. | Do not mount your usual home directory, client configuration or memory folders. Running only Mandu'a in Docker leaves the host client's context unchanged. |
+| Virtual machine | Set up a fresh client and the demo inside a separate virtual machine. | Avoid restoring or sharing the host client's configuration and memory folders. |
+
+Start with a separate profile if your client supports it; a separate user account
+is another option. Containers and virtual machines require more setup. They are
+environment-isolation options, not preconfigured Mandu'a installers: this PoC
+does not ship a ready-to-use container image for an authenticated coding client.
+The conversational demo in a container or virtual machine has not been validated
+end to end. Your chosen environment still needs the client, Git, uv and Python,
+and the client may require its own sign-in.
+
+Filesystem isolation does not remove memories stored by an online account.
+Where applicable, disable that feature for the trial or choose a client mode
+that does not use it. Keep your existing memory intact; use a separate environment
+rather than deleting your normal setup. If isolation is incomplete, note that
+when interpreting or sharing the results.
+
+Complete the following steps inside the environment you chose.
+
 ## 1. Register the skill
 
 Copy this message into your client:
