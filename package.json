@@ -1,0 +1,11 @@
+{
+  "name": "mandua-pi",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Experimental Git-backed memory skill for pi",
+  "license": "Apache-2.0",
+  "keywords": ["pi-package"],
+  "pi": {
+    "skills": ["./skills/mandua"]
+  }
+}

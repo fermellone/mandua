@@ -393,7 +393,10 @@ def test_readme_does_not_make_unverified_product_or_installation_claims() -> Non
     assert "proof of concept, not a production-ready service" in folded
     assert "windows has not been validated" in folded
     assert "declared operational identity, not authentication" in folded
-    assert "does not include an mcp server or agent skill" in folded
+    assert "includes an experimental pi skill, but no mcp server" in folded
+    manifest = json.loads(_read("package.json"))
+    assert manifest["pi"]["skills"] == ["./skills/mandua"]
+    assert (ROOT / "skills/mandua/SKILL.md").is_file()
     assert "does not include live openrouter calls" in folded
     assert "dependency installation may require network access" in folded
 
@@ -427,6 +430,10 @@ def test_public_authored_documents_are_english_and_cross_links_resolve() -> None
         "docs/prior-art.md",
         "docs/tutorial.md",
         "docs/conformance.md",
+        "docs/pi.md",
+        "docs/try-demo.md",
+        "docs/demo-story.md",
+        "docs/skill-registration.md",
     )
     known_non_english_phrases = (
         "este proyecto",
@@ -715,6 +722,17 @@ def test_wheel_and_sdist_are_self_contained_offline_poc_artifacts(tmp_path: Path
         "tests/acceptance/test_tutorial.py",
         "tests/unit/test_project_metadata.py",
         "uv.lock",
+        "package.json",
+        "docs/pi.md",
+        "skills/mandua/SKILL.md",
+        "docs/try-demo.md",
+        "docs/demo-story.md",
+        "docs/skill-registration.md",
+        "skills/mandua/scripts/mandua",
+        "skills/mandua/scripts/alternatives",
+        "skills/mandua/scripts/alternatives.py",
+        "skills/mandua/scripts/corrections",
+        "skills/mandua/scripts/corrections.py",
     } <= sdist_names
 
     environment = os.environ.copy()

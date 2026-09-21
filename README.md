@@ -60,6 +60,19 @@ $ make tutorial-check
 The complete 18-case ownership map is in [`docs/conformance.md`](docs/conformance.md). Run its
 focused executable gate with `make conformance-check`.
 
+## Talk to the demo memory (experimental)
+
+Follow the [demo walkthrough](docs/try-demo.md): register the skill with a message
+to your client, ask it to prepare the demo, read
+[the community garden's story](docs/demo-story.md), and have a conversation.
+No terminal commands are needed in the walkthrough. This remains a proof of
+concept for exploring a fictional memory, not a production memory service.
+
+The conversational workflow has been tried in pi. Registration in Claude Code
+and Codex has not yet been verified end to end. The skill uses your client's
+existing model; evidence may be sent to that model's provider. No additional model
+API key is required. Exploration is read-only after demo creation.
+
 ## Command shape
 
 Repository operations use this form:
@@ -244,8 +257,9 @@ available; it does not repair object storage or fetch missing history automatica
 This proof of concept:
 
 - is not a production security boundary, hosted memory service, or commercial MVP;
-- does not include an MCP server or agent skill;
-- does not include live OpenRouter calls or any other LLM provider integration;
+- includes an experimental pi skill, but no MCP server;
+- does not include live OpenRouter calls or a built-in chat model; the pi skill uses the client's
+  model, and the optional Jev adapter is a separate experimental integration;
 - does not include a vector index, parallel memory database, synthetic event ref, submodule
   federation, or custom merge driver;
 - does not authenticate `Agent-ID`, mandate commit signatures, or establish a trust-root policy;
@@ -255,8 +269,9 @@ This proof of concept:
 - does not promise complete answers when local history is shallow, missing, corrupt, expired, or
   truncated by configured limits.
 
-The future adapter boundary is the JSON schema, not hidden model behavior. Optional LLM experiments
-remain outside this PoC and outside its CI result.
+The core adapter boundary is the JSON schema, not hidden model behavior. The skill's discovery
+helper also reads Git directly; it is not a new core operation or covered by the core's hardening
+claims. Live model behavior remains outside deterministic CI results.
 
 ## Development verification
 
