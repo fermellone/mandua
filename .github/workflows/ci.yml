@@ -2,7 +2,25 @@ name: CI
 
 "on":
   push:
+    paths-ignore:
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "SECURITY.md"
+      - "ACKNOWLEDGMENTS.md"
+      - "docs/prior-art.md"
+      - "docs/pi.md"
+      - "docs/try-demo.md"
+      - "docs/demo-story.md"
   pull_request:
+    paths-ignore:
+      - "README.md"
+      - "CONTRIBUTING.md"
+      - "SECURITY.md"
+      - "ACKNOWLEDGMENTS.md"
+      - "docs/prior-art.md"
+      - "docs/pi.md"
+      - "docs/try-demo.md"
+      - "docs/demo-story.md"
 
 permissions:
   contents: read

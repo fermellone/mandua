@@ -47,6 +47,24 @@ $ make tutorial-check
 $ make build
 ```
 
+## Documentation checks in CI
+
+Every push and pull request gets a lightweight Linux documentation check: formatting,
+local Markdown link targets and public metadata consistency. It does not build the
+packages, run the demo or execute the full acceptance suite.
+
+The full Linux/macOS CI is skipped only when every changed file belongs to the
+explicit prose-only list in `.github/workflows/ci.yml`. Mixed documentation/code
+changes still run it. New files also run it unless deliberately added to that list.
+Skills, skill-registration instructions, the executable tutorial, conformance and
+release/hardening documents retain full verification. External URLs and Markdown
+fragment anchors are not checked by the local-link test.
+
+GitHub documents the filtering behavior in its
+[workflow syntax reference](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#onpushpull_requestpull_request_targetpathspaths-ignore).
+If branch protection is introduced, account for filtered workflows when choosing
+required checks: a workflow skipped by path filters can leave a required check pending.
+
 ## Commit metadata
 
 Write semantic English commit subjects, not session summaries. Implementation commits use these

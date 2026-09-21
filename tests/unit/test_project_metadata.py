@@ -209,9 +209,9 @@ def _parse_workflow_scalar(value: str) -> object:
     return value
 
 
-def _parse_workflow() -> dict[str, object]:
+def _parse_workflow(path: str = ".github/workflows/ci.yml") -> dict[str, object]:
     """Parse the deliberately small workflow subset into typed Python values."""
-    source_lines = _read(".github/workflows/ci.yml").splitlines()
+    source_lines = _read(path).splitlines()
     assert all("\t" not in line for line in source_lines)
     lines = [
         (len(line) - len(line.lstrip(" ")), line.lstrip(" "))
@@ -497,7 +497,21 @@ def test_ci_matrix_runs_only_the_approved_credential_free_gates() -> None:
     workflow = _read(".github/workflows/ci.yml")
     document = _parse_workflow()
     assert set(document) == {"name", "on", "permissions", "jobs"}
-    assert document["on"] == {"push": None, "pull_request": None}
+    ignored = document["on"]["push"]["paths-ignore"]
+    assert document["on"] == {
+        "push": {"paths-ignore": ignored},
+        "pull_request": {"paths-ignore": ignored},
+    }
+    assert set(ignored) == {
+        "README.md",
+        "CONTRIBUTING.md",
+        "SECURITY.md",
+        "ACKNOWLEDGMENTS.md",
+        "docs/prior-art.md",
+        "docs/pi.md",
+        "docs/try-demo.md",
+        "docs/demo-story.md",
+    }
     assert document["permissions"] == {"contents": "read"}
     jobs = document["jobs"]
     assert isinstance(jobs, dict) and set(jobs) == {"verify"}
@@ -554,6 +568,24 @@ def test_ci_matrix_runs_only_the_approved_credential_free_gates() -> None:
     )
     assert all(token not in serialized for token in forbidden)
     assert "\t" not in workflow
+
+
+def test_documentation_workflow_keeps_a_lightweight_check_on_every_change() -> None:
+    document = _parse_workflow(".github/workflows/docs.yml")
+    assert document["on"] == {"push": None, "pull_request": None}
+    assert document["permissions"] == {"contents": "read"}
+    assert set(document["jobs"]) == {"docs"}
+    job = document["jobs"]["docs"]
+    assert job["runs-on"] == "ubuntu-latest"
+    assert "strategy" not in job
+    steps = job["steps"]
+    assert steps[0]["with"]["persist-credentials"] is False
+    assert steps[1]["uses"] == "astral-sh/setup-uv@v6"
+    assert [step["run"] for step in steps if "run" in step] == [
+        "uv sync --locked",
+        "uv run ruff format --check .",
+        'uv run pytest tests/unit/test_project_metadata.py -q -k "not wheel and not fresh"',
+    ]
 
 
 def test_make_targets_preserve_conformance_and_release_gates() -> None:
