@@ -31,8 +31,10 @@ The repository's docs/pi.md contains the maintainer installation details.
 
 For another client, prefer a supported registration of the original skill
 location. If the client requires a skill file in its own directory, create a
-small local entry named mandua with valid skill metadata. Its instructions must
-load the canonical SKILL.md at the checkout's absolute path when invoked, resolve
+small local entry named mandua. Copy the `name` and `description` fields from the
+canonical SKILL.md frontmatter exactly; those trigger conditions are shared by
+all clients rather than being Codex-specific. Its instructions must load the
+canonical SKILL.md at the checkout's absolute path when invoked, resolve
 SKILL_DIR to that original directory, and follow those instructions. Do not copy
 or relocate the helper scripts. Keep this entry limited to the Mandu'a demo;
 do not change unrelated global instructions or credentials.
@@ -48,7 +50,10 @@ Stop here. The user will separately ask to prepare the demo.
 
 ## Current validation boundary
 
-The pi package and conversational demo have been exercised locally. The generic
-registration instructions are intended for other local coding clients, including
-Claude Code and Codex, but have not yet been verified end to end in those clients.
-Do not describe them as tested integrations until that verification is performed.
+The pi package and conversational demo have been exercised locally. A Codex local
+entry and an explicit Mandu'a invocation have also been exercised end to end.
+Automatic Codex selection previously chose unrelated client memory for an
+ambiguous "this demo" prompt; the revised shared trigger still requires a fresh
+manual conversational check. Claude Code and other clients have not been verified
+end to end. Do not describe those paths as tested integrations until that
+verification is performed.

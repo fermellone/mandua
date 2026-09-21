@@ -1,6 +1,6 @@
 ---
 name: mandua
-description: Conversar con la memoria Git de Mandu’a y explorar su demo local del huerto, recuperando decisiones, alternativas y correcciones con evidencia verificable.
+description: Use when the user asks about the Mandu'a memory demo ("esta demo"), its community garden or huerto, irrigation alternatives, thresholds, decisions, reasons, or corrections.
 ---
 
 # Mandu’a — memoria con evidencia Git
@@ -56,8 +56,23 @@ La pertenencia al historial no prueba una aprobación; usá evidencia explícita
 Una razón registrada documenta una justificación declarada, no su validez empírica.
 No presentes observaciones de contexto como causas explícitas de una decisión.
 
-Si el resultado basta, respondé sin nuevas consultas. Si necesitás comparar dos
-candidatos identificados, reutilizá sus OIDs en una única consulta dirigida:
+Para una pregunta sobre qué alternativas se evaluaron y por qué se eligió una,
+el descubrimiento es la consulta completa cuando el resultado contiene:
+
+1. los commits candidatos y sus cambios o razones registradas;
+2. el commit de selección o integración y su párrafo `Reason`;
+3. la nota de revisión, si la respuesta la menciona; y
+4. ningún `limit` que recorte evidencia necesaria para esa pregunta.
+
+Con esas cuatro condiciones, redactá la respuesta directamente con esta forma:
+alternativas y razones registradas; elección y razón registrada; OIDs o rutas que
+sustentan cada afirmación; inferencias separadas al final. Terminá la consulta ahí.
+El contenido posterior, las correcciones y el estado vigente quedan fuera de esa
+respuesta salvo que el usuario los haya pedido.
+
+Si falta una de esas piezas o un `limit` afecta la pregunta, hacé la siguiente
+consulta sobre esa pieza concreta. Para comparar dos candidatos identificados,
+reutilizá sus OIDs en una única consulta dirigida:
 
 ```bash
 "SKILL_DIR/scripts/alternatives" /ruta/al/repositorio --left OID --right OID

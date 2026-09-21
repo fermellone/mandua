@@ -5,8 +5,10 @@ fictional community garden using your existing coding assistant. It is a demo,
 not a production memory service.
 
 Use a local client that can read files and run tools. The conversational workflow
-has been tried in pi. Registration in Claude Code and Codex has not yet been
-verified end to end. A browser-only chat without local tools cannot run this demo.
+has been tried in pi. A local Codex entry and explicit skill invocation have also
+been exercised end to end; automatic selection with the current trigger still
+needs a fresh manual check. Registration in Claude Code has not yet been verified
+end to end. A browser-only chat without local tools cannot run this demo.
 
 ## Before starting: choose a clean environment
 
