@@ -65,6 +65,7 @@ include = [
   "/docs/try-demo.md",
   "/docs/demo-story.md",
   "/docs/skill-registration.md",
+  "/docs/agent-validation.md",
   "/scripts",
   "/src",
   "/tests",

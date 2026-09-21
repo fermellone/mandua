@@ -23,6 +23,11 @@ pi install "$PWD"
 For an existing checkout, run the last two commands from its root. This registers
 that directory with pi: keep the checkout in place. The helpers use a non-editable
 Python installation so demo resources also work in an extracted source archive.
+Preparation uses the checkout's default `.venv` directory. The helpers reuse it
+without synchronizing, downloading packages or accessing the shared uv cache.
+If it is missing, they stop with a setup instruction. After updating the source
+checkout, run `uv sync --locked --no-editable` there explicitly to refresh the
+installed version before querying again; queries do not install source updates.
 No npm publication or Python registry release is required. Do not copy only
 `skills/mandua`: its helpers locate
 the Python project relative to their own location. Source archives include the pi
@@ -51,12 +56,26 @@ The demo is created in `mandua-demo/`, not in the program checkout. Read
 [the community garden's story](demo-story.md), then converse in your preferred
 language about whatever you want to understand.
 
-For an existing demo, ask the skill to reuse it. For your own repository, provide
-its explicit path. Creating the fixture is the only write in the skill's intended
-workflow; subsequent questions inspect evidence. Instructions are not a sandbox:
-pi retains its normal tools and permissions.
+For an existing demo, ask the skill to reuse it. Preparation returns the memory
+repository's absolute path, which the skill reuses within that conversation.
+For your own memory repository, provide its explicit path; no garden setup is
+needed. Start a new conversation by selecting a memory again. An explicit new
+path changes the selected memory, while earlier citations remain attached to
+their original repository. The general query instructions are in SKILL.md; the
+garden setup and directory layout are in its separate references/demo.md guide.
+Creating the fixture on request is the only write in the skill's intended workflow;
+automatic ingestion is not included. Instructions are not a sandbox: pi retains
+its normal tools and permissions.
 
 ## Evidence, limits, and privacy
+
+The skill uses `--format agent` for core queries. This deterministic view preserves
+citable records, labels query observations and inferences separately, and describes
+what each operation did and did not retrieve. Low-level history counters and empty
+per-claim citation lists are omitted; the original `--format json` remains available for
+diagnostics. A complete lookup by Decision-ID does not search file contents or
+establish that measurements are absent from the repository. Recorded reasons and
+approvals do not by themselves demonstrate empirical effectiveness.
 
 The `alternatives` helper discovers local branches, remote-tracking refs, tags,
 and recent commits without assuming demo names. It reports at most 32 refs,
@@ -81,9 +100,11 @@ HEAD and up to 12 relevant historical records. `--revision REV` selects another
 current revision. It reports ancestry relative to that revision, unavailable
 contents, and excerpts clipped at 3,000 characters. It excludes uncommitted edits
 and does not infer empirical correctness, deployment status, or integration from
-a correction link alone. Core gaps, warnings and history scope remain in the
-output. This experimental composition is not a new core API; Git reads use the
-existing bounded runner, with per-operation rather than one aggregate budget.
+a correction link alone. Core gaps, warnings and incomplete-history conditions
+remain visible as scope limitations. Both helpers default to the agent view;
+`--format json` retains their original diagnostic output. This experimental
+composition is not a new core API; Git reads use the existing bounded runner,
+with per-operation rather than one aggregate budget.
 
 ## Validation
 
@@ -92,7 +113,10 @@ recorded reasons and review notes, read-only behavior, truncation, errors, and h
 relocation to a path containing spaces. No test invokes pi or a model. The local
 prototype was manually exercised in pi for alternatives, absent measurements, and
 corrections; those examples do not guarantee model accuracy or token savings on
-other repositories. Review the returned evidence and limits.
+other repositories. The current agent view and general memory selection were
+exercised in Codex with controlled library cases; they have not yet been retested
+conversationally in pi. See the [trial report](agent-validation.md) for outcomes,
+remaining overbroad absence claims, and validation limits.
 
 To remove the package, run `pi remove /absolute/path/to/mandua` using the path that
 was installed. This does not delete your checkout or demo.

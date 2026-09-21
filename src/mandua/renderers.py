@@ -3,6 +3,7 @@
 import json
 from typing import Any
 
+from mandua.agent_view import agent_result
 from mandua.errors import ManduaError
 from mandua.models import MemoryResult
 
@@ -10,6 +11,14 @@ from mandua.models import MemoryResult
 def render_json(value: MemoryResult | ManduaError) -> str:
     """Render a result or error as stable JSON."""
     return json.dumps(value.to_dict(), ensure_ascii=False, sort_keys=True)
+
+
+def render_agent(value: MemoryResult | ManduaError) -> str:
+    """Render scoped evidence for a conversational agent, preserving errors."""
+    payload = value.to_dict()
+    if isinstance(value, MemoryResult):
+        payload = agent_result(payload)
+    return json.dumps(payload, ensure_ascii=False)
 
 
 def render_human(value: MemoryResult | ManduaError) -> str:

@@ -43,13 +43,18 @@ def test_unrelated_names_reasons_notes_and_targeted_comparison(repo, monkeypatch
     assert any(r["ref"] == "refs/heads/trunk" for r in result["refs"])
     assert any("Reason: Narrow streets." in c["message"] for c in result["commits"])
     assert any("dispatcher" in c.get("review", "") for c in result["commits"])
+    assert result["scope"]["empirical_validity_assessed"] is False
+    assert result["scope"]["repository_wide_absence_established"] is False
     for option in ("bicycle", "van"):
         assert any(option in c.get("patch", "") for c in result["commits"])
     pair = inspect(repo, monkeypatch, capsys, "--left", blue, "--right", orange)
     assert "commits" not in pair and "refs" not in pair
     assert pair["comparison"]["operation"] == "compare"
-    assert "history_scope" in pair["comparison"]
+    assert pair["comparison"]["view"] == "agent"
+    assert "scope" in pair["comparison"]
     assert "bicycle" in pair["comparison_patch"] and "van" in pair["comparison_patch"]
+    raw = inspect(repo, monkeypatch, capsys, "--left", blue, "--right", orange, "--format", "json")
+    assert "history_scope" in raw["comparison"]
     assert repo.git("status", "--porcelain").stdout == before
 
 
@@ -77,37 +82,112 @@ def test_invalid_selection_and_missing_repository_fail(repo, monkeypatch, capsys
         helper.main()
 
 
-def test_launchers_relocate_with_spaces_and_preserve_cwd(tmp_path):
-    # A recording uv stub checks launcher routing, not pi or model behavior.
-    checkout = tmp_path / "source checkout"
-    scripts = checkout / "skills/mandua/scripts"
-    shutil.copytree(SCRIPT.parent, scripts)
-    bin_dir = tmp_path / "bin"
-    bin_dir.mkdir()
-    stub = bin_dir / "uv"
-    stub.write_text('#!/bin/sh\nprintf "%s\\n" "$PWD" "$@"\n', encoding="utf-8")
-    stub.chmod(0o755)
-    cwd = tmp_path / "separate playground"
-    cwd.mkdir()
-    env = {**os.environ, "PATH": f"{bin_dir}{os.pathsep}{os.environ['PATH']}"}
-    for name in ("mandua", "alternatives", "corrections"):
-        result = subprocess.run(
-            ["sh", str(scripts / name), "--help"],
-            cwd=cwd,
-            env=env,
-            text=True,
-            capture_output=True,
-            check=True,
-        ).stdout.splitlines()
-        assert result[:6] == [
-            str(cwd),
-            "run",
-            "--no-editable",
+@pytest.fixture(scope="module")
+def prepared_checkout(tmp_path_factory):
+    checkout = tmp_path_factory.mktemp("launchers") / "source checkout"
+    checkout.mkdir()
+    for name in ("pyproject.toml", "uv.lock", "README.md", "LICENSE"):
+        shutil.copy2(ROOT / name, checkout / name)
+    for name in ("src", "demo", "adapters", "skills"):
+        shutil.copytree(ROOT / name, checkout / name, ignore=shutil.ignore_patterns("__pycache__"))
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.startswith("UV_") and key not in {"VIRTUAL_ENV", "PYTHONPATH"}
+    }
+    if "UV_CACHE_DIR" in os.environ:
+        env["UV_CACHE_DIR"] = os.environ["UV_CACHE_DIR"]
+    subprocess.run(
+        [
+            "uv",
+            "sync",
+            "--offline",
             "--locked",
+            "--no-editable",
+            "--no-dev",
+            "--python",
+            sys.executable,
             "--project",
             str(checkout),
-        ]
-        assert result[-1] == "--help"
-        assert result[6] == ("mandua" if name == "mandua" else "python")
-        if name != "mandua":
-            assert result[7] == str(scripts / f"{name}.py")
+        ],
+        env=env,
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=60,
+    )
+    # A changed checkout must not trigger a build while serving an installed version.
+    project = checkout / "pyproject.toml"
+    project.write_text(
+        project.read_text().replace("hatchling>=1.27,<2", "mandua-missing-build-tool==0"),
+        encoding="utf-8",
+    )
+    blocked_cache = checkout / "not a cache directory"
+    blocked_cache.write_text("cache access must not be needed", encoding="utf-8")
+    env.update(UV_OFFLINE="1", UV_CACHE_DIR=str(blocked_cache), PYTHONDONTWRITEBYTECODE="1")
+    return checkout, env
+
+
+@pytest.mark.parametrize("launcher", ("mandua", "alternatives", "corrections"))
+def test_prepared_launchers_query_offline_without_cache_or_rebuild(
+    prepared_checkout, repo, launcher
+):
+    checkout, env = prepared_checkout
+    repo.write("rules.txt", "14 days\n")
+    oid = repo.commit("Loan policy\n\nDecision-ID: DEC-LOAN-001")
+    args = {
+        "mandua": ["--repo", ".", "timeline", "--limit", "1", "--format", "agent"],
+        "alternatives": ["."],
+        "corrections": [".", "--decision", "DEC-LOAN-001", "--path", "rules.txt"],
+    }
+    before = repo.git("status", "--porcelain").stdout
+    installed = checkout / ".venv"
+    snapshot = {
+        str(p): (p.stat().st_size, p.stat().st_mtime_ns)
+        for p in installed.rglob("*")
+        if p.is_file()
+    }
+    result = subprocess.run(
+        ["sh", str(checkout / "skills/mandua/scripts" / launcher), *args[launcher]],
+        cwd=repo.path,
+        env=env,
+        text=True,
+        capture_output=True,
+        timeout=30,
+        check=False,
+    )
+    assert result.returncode == 0, result.stderr
+    payload = json.loads(result.stdout)
+    if launcher == "mandua":
+        assert payload["operation"] == "timeline"
+        assert payload["view"] == "agent"
+        assert oid in result.stdout
+    elif launcher == "alternatives":
+        assert payload["head"] == oid
+    else:
+        assert payload["current"]["oid"] == oid
+        assert payload["current"]["content"] == "14 days\n"
+        assert payload["decision"]["view"] == "agent"
+    assert repo.git("status", "--porcelain").stdout == before
+    assert snapshot == {
+        str(p): (p.stat().st_size, p.stat().st_mtime_ns)
+        for p in installed.rglob("*")
+        if p.is_file()
+    }
+
+
+@pytest.mark.parametrize("launcher", ("mandua", "alternatives", "corrections"))
+def test_unprepared_launchers_explain_setup_without_creating_environment(tmp_path, launcher):
+    scripts = tmp_path / "skills/mandua/scripts"
+    shutil.copytree(SCRIPT.parent, scripts)
+    result = subprocess.run(
+        ["sh", str(scripts / launcher), "--help"],
+        cwd=tmp_path,
+        text=True,
+        capture_output=True,
+        timeout=10,
+        check=False,
+    )
+    assert result.returncode != 0
+    assert "uv sync --locked --no-editable" in result.stderr
+    assert not (tmp_path / ".venv").exists()

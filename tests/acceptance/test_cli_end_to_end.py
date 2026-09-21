@@ -343,15 +343,17 @@ def test_cli_real_repository_error_uses_json_stderr_and_exit_two(tmp_path, capsy
 def test_console_script_and_module_help_are_identical_and_list_every_command() -> None:
     """This fails if packaging and python -m expose different English command surfaces."""
     repository = Path(__file__).resolve().parents[2]
+    # Compare prepared entrypoints without rebuilding or changing the installation.
+    uv_run = ["uv", "run", "--no-sync", "--offline", "--no-cache"]
     console = subprocess.run(
-        ["uv", "run", "mandua", "--help"],
+        [*uv_run, "mandua", "--help"],
         cwd=repository,
         check=False,
         capture_output=True,
         text=True,
     )
     module = subprocess.run(
-        ["uv", "run", "python", "-m", "mandua", "--help"],
+        [*uv_run, "python", "-m", "mandua", "--help"],
         cwd=repository,
         check=False,
         capture_output=True,

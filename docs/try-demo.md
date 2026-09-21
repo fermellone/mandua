@@ -66,7 +66,8 @@ first if registration required it. Then send:
 
 > Use the Mandu'a skill to prepare its community garden demo in this folder.
 > If the demo already exists, reuse it. Tell me when it is ready, without answering
-> questions about its history yet.
+> questions about its history yet. Give me the absolute path of the memory
+> repository and use that repository for subsequent questions in this conversation.
 
 Wait for confirmation that the demo is ready before continuing. Preparation is a
 required step in this walkthrough.
@@ -82,6 +83,13 @@ or an answer key.
 Ask whatever you want to understand about the garden's memory, in your preferred
 language. If your client does not select the skill, ask it to use the Mandu'a skill.
 It should ground its answers in the records and say when information is missing.
+
+In a new conversation, give the skill the absolute memory repository path returned
+during preparation. The trial folder, the source checkout and the memory repository
+are different locations. Naming the repository makes the selected source explicit;
+registration alone does not make any repository the default. The same read-only
+query workflow can address another memory repository by its path. Preparing this
+fictional garden is only the demo walkthrough, not a requirement for other memories.
 
 The records are fictional. Your client may send retrieved evidence to its model
 provider, and its normal usage charges or subscription limits apply. The demo

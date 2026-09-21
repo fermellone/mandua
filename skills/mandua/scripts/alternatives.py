@@ -5,6 +5,7 @@ import json
 import os
 import subprocess
 
+from mandua.agent_view import agent_result, agent_scope
 from mandua.errors import ManduaError
 from mandua.memory_service import MemoryService
 
@@ -15,6 +16,7 @@ def main():
     parser.add_argument("--left")
     parser.add_argument("--right")
     parser.add_argument("--limit", type=int, default=16)
+    parser.add_argument("--format", choices=("agent", "json"), default="agent")
     args = parser.parse_args()
     if bool(args.left) != bool(args.right):
         parser.error("--left and --right must be supplied together")
@@ -83,6 +85,10 @@ def main():
             "comparison_patch",
         )
         result["limits"] = limits
+        if args.format == "agent":
+            result["comparison"] = agent_result(result["comparison"])
+            result["scope"] = agent_scope("compare")
+            result["scope"]["retrieval"] += " Includes a bounded content diff."
         print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
         return
 
@@ -156,6 +162,8 @@ def main():
         },
     }
     result["limits"] = limits
+    if args.format == "agent":
+        result["scope"].update(agent_scope("alternatives"))
     print(json.dumps(result, ensure_ascii=False, separators=(",", ":")))
 
 

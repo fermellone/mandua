@@ -1,6 +1,8 @@
 """Offline correction evidence checks on a repository unrelated to the demo."""
 
 import importlib.util
+import json
+import sys
 from pathlib import Path
 
 import pytest
@@ -85,3 +87,23 @@ def test_snapshot_and_decision_result_limits_are_disclosed(repo):
     assert any("12 historical" in limit for limit in result["limits"])
     limited = helper.inspect(repo.path, "SHIP-7", "shipping window.txt", limit=1)
     assert limited["decision"]["warnings"]
+
+
+def test_agent_corrections_keep_verified_links_snapshots_and_limits(repo, monkeypatch, capsys):
+    wrong = record(repo, "90\n")
+    fixed = record(repo, "30\n", f"Corrects: {wrong}")
+    args = [str(SCRIPT), str(repo.path), "--decision", "SHIP-7", "--path", "shipping window.txt"]
+    monkeypatch.setattr(sys, "argv", args)
+    helper.main()
+    result = json.loads(capsys.readouterr().out)
+    assert result["decision"]["view"] == "agent"
+    assert result["scope"]["repository_wide_absence_established"] is False
+    assert result["current"]["content"] == "30\n"
+    assert any(
+        wrong in e.get("attributes", {}).get("verified_corrects", [])
+        for e in result["decision"]["evidence"]
+    )
+    assert next(r for r in result["records"] if r["oid"] == fixed)["ancestor_of_current"]
+    monkeypatch.setattr(sys, "argv", [*args, "--format", "json"])
+    helper.main()
+    assert "history_scope" in json.loads(capsys.readouterr().out)["decision"]

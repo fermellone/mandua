@@ -434,6 +434,7 @@ def test_public_authored_documents_are_english_and_cross_links_resolve() -> None
         "docs/try-demo.md",
         "docs/demo-story.md",
         "docs/skill-registration.md",
+        "docs/agent-validation.md",
     )
     known_non_english_phrases = (
         "este proyecto",
@@ -765,6 +766,8 @@ def test_wheel_and_sdist_are_self_contained_offline_poc_artifacts(tmp_path: Path
         "skills/mandua/scripts/alternatives.py",
         "skills/mandua/scripts/corrections",
         "skills/mandua/scripts/corrections.py",
+        "skills/mandua/references/demo.md",
+        "docs/agent-validation.md",
     } <= sdist_names
 
     environment = os.environ.copy()

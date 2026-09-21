@@ -4,6 +4,7 @@ import argparse
 import json
 from pathlib import Path, PurePosixPath
 
+from mandua.agent_view import agent_result, agent_scope
 from mandua.errors import ManduaError
 from mandua.git_runner import GitRunner
 from mandua.memory_service import MemoryService
@@ -74,12 +75,17 @@ def main():
     parser.add_argument("--path", required=True)
     parser.add_argument("--revision", default="HEAD")
     parser.add_argument("--limit", type=int, default=20)
+    parser.add_argument("--format", choices=("agent", "json"), default="agent")
     args = parser.parse_args()
     if not 1 <= args.limit <= 50:
         parser.error("--limit must be between 1 and 50")
+    result = inspect(args.repo, args.decision, args.path, args.revision, args.limit)
+    if args.format == "agent":
+        result["decision"] = agent_result(result["decision"])
+        result["scope"].update(agent_scope("corrections"))
     print(
         json.dumps(
-            inspect(args.repo, args.decision, args.path, args.revision, args.limit),
+            result,
             ensure_ascii=False,
             separators=(",", ":"),
         )

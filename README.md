@@ -73,21 +73,37 @@ to your client, ask it to prepare the demo, read
 No terminal commands are needed in the walkthrough. This remains a proof of
 concept for exploring a fictional memory, not a production memory service.
 
-The conversational workflow has been tried in pi. Registration in Claude Code
-and Codex has not yet been verified end to end. The skill uses your client's
+The conversational workflow has been tried in pi and in local Codex trials.
+The general repository-selection flow and agent view were exercised in Codex with
+a fictional library, including reports outside the policy file; see the
+[results and limits](docs/agent-validation.md).
+Claude Code has not yet been verified end to end. The skill uses your client's
 existing model; evidence may be sent to that model's provider. No additional model
 API key is required. Exploration is read-only after demo creation.
+
+The skill can also query a memory repository selected by its absolute path,
+without preparing the garden. That selection belongs to the conversation;
+registration does not choose a default memory or enable automatic ingestion.
 
 ## Command shape
 
 Repository operations use this form:
 
 ```text
-mandua --repo <path> <operation> [arguments] [--format human|json]
+mandua --repo <path> <operation> [arguments] [--format human|json|agent]
 ```
 
-`human` is the default format. JSON is the stable adapter boundary. `demo` is the only operation
-that does not accept `--repo`.
+`human` is the default format. `json` is the stable adapter boundary. `agent` is a
+deterministic conversational view with citable records and explicit retrieval limits;
+it does not use another model. `demo` is the only operation that does not accept
+`--repo`, and supports only `human` and `json`.
+
+For example, `decision ID --format agent` retrieves decision metadata and review
+notes, not file contents. Even an untruncated lookup cannot establish that the
+repository contains no measurements. The agent view separates these limits from
+evidence and omits low-level history counters and empty per-claim citation lists.
+Use `--format json` for the original diagnostic fields; existing integrations keep
+their contract.
 
 | Operation | Verified behavior |
 | --- | --- |

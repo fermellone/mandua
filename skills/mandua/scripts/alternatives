@@ -2,4 +2,10 @@
 set -eu
 script_dir=$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)
 project_dir=$(CDPATH='' cd -- "$script_dir/../../.." && pwd)
-exec uv run --no-editable --locked --project "$project_dir" python "$script_dir/alternatives.py" "$@"
+if [ ! -x "$project_dir/.venv/bin/python" ] || [ ! -x "$project_dir/.venv/bin/mandua" ]; then
+  printf 'Mandu\047a environment is not prepared. Run in the source checkout:\n  uv sync --locked --no-editable --project "%s"\n' "$project_dir" >&2
+  exit 1
+fi
+export UV_PROJECT_ENVIRONMENT="$project_dir/.venv"
+exec uv run --no-sync --offline --no-cache --no-python-downloads \
+  --python "$project_dir/.venv/bin/python" --project "$project_dir" python "$script_dir/alternatives.py" "$@"

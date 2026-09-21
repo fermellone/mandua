@@ -23,7 +23,7 @@ from mandua.models import (
     MemoryResult,
     QueryLimits,
 )
-from mandua.renderers import render_human, render_json
+from mandua.renderers import render_agent, render_human, render_json
 
 _INCOMPLETE_EXIT_CODES = {
     ErrorCode.INCOMPLETE_HISTORY,
@@ -148,7 +148,7 @@ def _build_parser() -> _ArgumentParser:
         metavar="PATH",
         help="new or empty directory to retain; otherwise a temporary directory is retained",
     )
-    _add_format(demo)
+    _add_format(demo, allow_agent=False)
 
     context = _add_operation(operations, "context", "reconstruct bounded working context")
     context.add_argument("--task-id", help="exact Task-ID trailer to select")
@@ -264,11 +264,11 @@ def _add_operation(
     )
 
 
-def _add_format(parser: argparse.ArgumentParser) -> None:
+def _add_format(parser: argparse.ArgumentParser, *, allow_agent: bool = True) -> None:
     parser.add_argument(
         "--format",
         dest="output_format",
-        choices=("human", "json"),
+        choices=("human", "json", "agent") if allow_agent else ("human", "json"),
         default="human",
         help="output format (default: human)",
     )
@@ -437,7 +437,7 @@ def _paths(values: list[str] | None) -> tuple[PurePosixPath, ...]:
 
 
 def _write_result(result: MemoryResult, output_format: str) -> None:
-    renderer = render_json if output_format == "json" else render_human
+    renderer = {"json": render_json, "agent": render_agent}.get(output_format, render_human)
     print(renderer(result))
 
 
@@ -446,7 +446,7 @@ def _write_demo_report(report: DemoReport, output_format: str) -> None:
 
 
 def _write_error(error: ManduaError, output_format: str) -> None:
-    renderer = render_json if output_format == "json" else render_human
+    renderer = {"json": render_json, "agent": render_agent}.get(output_format, render_human)
     print(renderer(error), file=sys.stderr)
 
 
